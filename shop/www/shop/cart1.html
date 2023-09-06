@@ -1,0 +1,134 @@
+{% extends "templates/shop/base.html" %}
+{% block head_script_tags %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+
+<!-- Include the Frappe client library via jsdelivr CDN -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/frappe@6/dist/frappe-web.min.js"></script> -->
+
+
+
+
+{% endblock %}
+{% block script %}
+
+{% endblock %}
+
+{% block body %}
+<style>
+    /* Custom CSS for two-column layout */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .col {
+        flex: 1;
+        margin: 10px;
+    }
+
+    /* Adjust the width of the columns for different screen sizes */
+    @media (max-width: 768px) {
+        .col {
+            flex: 100%;
+        }
+    }
+</style>
+
+<div class="row" style="background-color: azure;margin-top: 80px;">
+    <div class="col">
+        
+       
+        {% for item in cart_items %}
+        <div class="py-20 row" style="display: flex; align-items: center;" id="cart_item_{{ item.item }}" name="{{ item.item }}">
+                <div>
+                    <img alt="{{ title }}" src="{{ item.image }}" width="150">
+                    <span id="item_name" class="item_name">{{item.name}}</span>
+                    <h1 style="font-family: 'Times New Roman', Times, serif; font-weight: bolder;" id="item_name">{{ item.item }}</h1>
+                </div>
+                <div>
+                    {%- if status == 'Available' -%}
+                        <span class="badge badge-success">Available</span>
+                    {%- elif status == 'Issued' -%}
+                        <span class="badge badge-primary">Issued</span>
+                    {%- endif -%}
+                </div>
+                <div style="margin-left: 100;">
+                    Price: <strong id="price" class="price">{{ item.price }}</strong>
+                    <div style="border: 2px solid black; text-align: center;">
+                        <button class="quantity-button1" data-item-id="cart_item_{{ item.item }}">-</button>
+                        <h3 class="item_quantity">{{ item.quantity }}</h3>
+                        <button class="quantity-button2" data-item-id="cart_item_{{ item.item }}">+</button>
+                    </div>
+                </div>
+                <h1 style="margin-left: 20px; " id="total" class="total">{{item.total}}</h1>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="col" style="margin-top: 100px;margin-left: 500px;background-color:beige;padding: 10px;text-align: center;">
+        <h1 style="padding: 20px;"> Price Details</h1>
+        <h2 >Total Amount :</h2>
+        <h2 id="Total_amnt">{{total}}</h2>
+        <!-- Add the logic here to calculate the total amount -->
+        <br>
+        <button style="background-color: rgb(51, 227, 20);border:2px solid rgb(51, 227, 20) ;border-radius: 15px ;padding:10px;color: antiquewhite;text-align: center"; id="buy-button">Buy</button>
+        <a href="/shop"><button style="background-color: rgb(51, 227, 20);border:2px solid rgb(51, 227, 20) ;border-radius: 15px ;padding:10px;color: antiquewhite;text-align: center;">Home</button>
+        </a>
+        </div>
+</div>
+
+
+<script>
+    const buyButton = document.getElementById("buy-button")
+
+buyButton.onclick = async function (e) {
+    const options = await getRazorpayOrderOptions()
+    const razorpayOrder = createRazorpayOrder(options)
+    razorpayOrder.open()
+
+    e.preventDefault()
+}
+
+async function getRazorpayOrderOptions() {
+    const headers = {
+        Accept: 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
+        'X-Frappe-CSRF-Token': '{{ csrf_token }}'
+    }
+
+    const response = await fetch("/api/method/shop.api.create_cart_order", {
+        method: 'POST',
+        body: JSON.stringify({
+            price: '{{ total }}'
+        }),
+        headers
+    })
+
+    if (response.ok) {
+        const orderData = (await response.json()).message // frappe wraps the response inside "message" key
+
+        const options = {
+            "key": orderData.key_id,
+            "order_id": orderData.order_id,
+            "handler": (res) => {
+                window.location = "/shop/success";
+            }
+        }
+
+        return options
+    } else {
+        // EXERCISE: Better handling 
+        alert("Something went wrong")
+        throw Error("")
+    }
+}
+
+function createRazorpayOrder(options) {
+    console.log("sucess");
+    const razorpayOrder = new Razorpay(options)
+    return razorpayOrder
+    
+}
+</script>
+{% endblock %}

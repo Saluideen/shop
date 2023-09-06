@@ -7,6 +7,9 @@ app_description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
 app_email = "shop@gmail.com"
 app_license = "shop"
 
+
+
+
 # Includes in <head>
 # ------------------
 

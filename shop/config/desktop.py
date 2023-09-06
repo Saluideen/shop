@@ -5,6 +5,9 @@ def get_data():
 		{
 			"module_name": "Vegishop",
 			"type": "module",
-			"label": _("Vegishop")
+			"label": _("Vegishop"),
+			"icon": "octicon octicon-book",
+			"type": "module",
+
 		}
 	]

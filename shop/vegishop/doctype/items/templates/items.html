@@ -1,0 +1,147 @@
+{% extends "templates/shop/base.html" %}
+
+{% block head_script_tags %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+
+<!-- Include the Frappe client library via jsdelivr CDN -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/frappe@6/dist/frappe-web.min.js"></script> -->
+
+
+
+
+{% endblock %}
+
+{% block body %}
+<main class="container mb-6">
+    <nav class="breadcrumb mt-4" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="/shop">Shop</a></li>
+            <li class="is-active"><a href="#" aria-current="page" style="color: rgb(64, 222, 16);font-size: medium;">{{ doc.name }}</a></li>
+        </ul>
+    </nav>
+
+    <div class="columns">
+        <div class="column is-one-third">
+            <img src="{{ doc.image }}" alt=" Image">
+        </div>
+        <div class="column" style="margin-top: 100px;">
+            <div>
+                <h2  style="color: rgb(64, 222, 16);font-size: large;font-family: 'Times New Roman', Times, serif;" id="name">{{ doc.name }}</h2>
+                <h4 >$ {{ doc.price }}</h4>
+            </div>
+
+           
+
+            <div style="margin-top: 20px;">
+                
+                <button id="buy-button" style="background-color: rgb(51, 227, 20);border:2px solid rgb(51, 227, 20) ;border-radius: 15px ;padding:10px;color: antiquewhite;text-align: center;">Buy</button>
+                <button id="cart-button" class="cart-button" style="background-color: rgb(51, 227, 20);border:2px solid rgb(51, 227, 20) ;border-radius: 15px ;padding:10px;color: antiquewhite;text-align: center;"
+                >Add to Cart</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+
+
+<script>
+    const cart=document.getElementById("cart-button")
+    cart.onclick=async function(e){
+        
+        const cart_item = await add_to_cart()
+        console.log(cart_item);
+       
+    }
+    async function add_to_cart() {
+        const headers = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-Frappe-CSRF-Token': '{{ csrf_token }}'
+        }
+
+        const response = await fetch("/api/method/shop.api.add_to_cart", {
+            method: 'POST',
+            body: JSON.stringify({
+                item_name: '{{ doc.name }}',
+                price:'{{doc.price}}'
+            }),
+            headers,
+            credentials: 'same-origin',
+
+        })
+
+        if (response.ok) {
+            const orderData = (await response.json()).message // frappe wraps the response inside "message" key
+
+            const options = {
+                // "key": orderData.key_id,
+                // "order_id": orderData.order_id,
+                "handler": (res) => {
+                    window.location = "/shop/success";
+                }
+            }
+
+            return options
+        } else {
+            // EXERCISE: Better handling 
+            alert("Something went wrong")
+            throw Error("")
+        }
+    }
+
+    
+    const buyButton = document.getElementById("buy-button")
+
+    buyButton.onclick = async function (e) {
+        const options = await getRazorpayOrderOptions()
+        const razorpayOrder = createRazorpayOrder(options)
+        razorpayOrder.open()
+
+        e.preventDefault()
+    }
+
+    async function getRazorpayOrderOptions() {
+        const headers = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json; charset=utf-8',
+            'X-Frappe-CSRF-Token': '{{ csrf_token }}'
+        }
+
+        const response = await fetch("/api/method/shop.api.create_item_order", {
+            method: 'POST',
+            body: JSON.stringify({
+                item_name: '{{ doc.name }}'
+            }),
+            headers
+        })
+
+        if (response.ok) {
+            const orderData = (await response.json()).message // frappe wraps the response inside "message" key
+
+            const options = {
+                "key": orderData.key_id,
+                "order_id": orderData.order_id,
+                "handler": (res) => {
+                    window.location = "/shop/success";
+                }
+            }
+
+            return options
+        } else {
+            // EXERCISE: Better handling 
+            alert("Something went wrong")
+            throw Error("")
+        }
+    }
+
+    function createRazorpayOrder(options) {
+        const razorpayOrder = new Razorpay(options)
+        return razorpayOrder
+        
+    }
+</script>
+
+{% endblock %}

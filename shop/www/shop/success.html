@@ -1,0 +1,23 @@
+{% extends "templates/shop/base.html" %}
+
+{% block head_script_tags %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<div class="container" style="text-align: center;
+margin-left: 100px;margin-top: 200px;font-family:Georgia, 'Times New Roman', Times, serif;font-weight: bolder">
+    <h1 class="is-size-1 my-6 is-bold" style="color: rgb(21, 204, 18);">Payment Successful</h1>
+    <h2 class="is-size-5 my-6">Your item is on the way! Check your inbox!</h1>
+</div>
+
+<script>
+    confetti({
+        particleCount: 2000,
+        spread: 280,
+        origin: { y: 0.5 }
+    });
+</script>
+
+{% endblock %}
