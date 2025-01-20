@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Progress</title>
+    <style>
+        .task-container {
+            margin: 20px auto;
+            max-width: 800px;
+            font-family: Arial, sans-serif;
+        }
+
+        .progress {
+            height: 30px; /* Increase the height as needed */
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #e0e0e0;
+        }
+
+        .progress-bar {
+            font-size: 16px; /* Adjust font size for better visibility */
+            line-height: 30px; /* Center text vertically */
+        }
+
+        .completed {
+            background-color: #28a745; /* Green */
+        }
+
+        .pending {
+            background-color: #ffc107; /* Yellow */
+        }
+
+        .legend {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .legend div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend span {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+        }
+
+        /* Remove table borders */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        /* Style the horizontal lines */
+        hr {
+            border: 0;
+            border-top: 1px solid #e0e0e0;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    {{ project_details }}
+    <div class="task-container">
+        <table>
+            <!-- <thead class="thead-dark">
+                <tr>
+                    <th>Task</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                </tr>
+            </thead> -->
+            <tbody>
+                {% for project_details in projects %}
+                <tr>
+                    <td style="font-weight: bold;font-size: medium;">{{ project_details.name }}</td>
+                    <td>Start Date:{{ project_details.start_date }}</td>
+                    <td>End Date:{{ project_details.end_date }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <p><strong>Total: </strong>{{project_details.total}} | <strong>Completed:</strong> {{ project_details.completed }} | <strong>Total Pending:</strong> {{ project_details.pending }}</p>
+                        <div class="progress">
+                            <div class="progress-bar completed" style="width: {{ project_details.completed / project_details.total * 100 }}%">
+                                
+                            </div>
+                            <div class="progress-bar pending" style="width: {{project_details.pending / project_details.total * 100 }}%"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <hr>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="legend">
+            <div>
+                <span class="completed"></span> Completed
+            </div>
+            <div>
+                <span class="pending"></span> Pending
+            </div>
+        </div>
+    </div>
+</body>
+</html>
